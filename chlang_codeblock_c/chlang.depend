@@ -1,0 +1,30 @@
+# depslib dependency file v1.0
+1492768823 source:d:\workspace\chlang\main.c
+	"token.h"
+	"./link/LinkedList.h"
+
+1492508513 d:\workspace\chlang\token.h
+	<string.h>
+	<ctype.h>
+	<stdlib.h>
+	<stdio.h>
+
+1492619101 source:d:\workspace\chlang\token.c
+	"token.h"
+
+1492767095 source:d:\workspace\chlang\expr.c
+	"expr.h"
+
+1492681608 d:\workspace\chlang\expr.h
+	<string.h>
+	<stdint.h>
+	<stdlib.h>
+	<stdio.h>
+	"token.h"
+
+1492770893 source:d:\workspace\chlang\link\linkedlist.c
+	"LinkedList.h"
+
+1492770477 d:\workspace\chlang\link\linkedlist.h
+	<stdio.h>
+
