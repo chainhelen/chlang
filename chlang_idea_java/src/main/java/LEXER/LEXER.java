@@ -136,7 +136,10 @@ public class LEXER{
 
             srcCurPos++;
 
-            return token;
+            //if return current token directly, maybe cause error
+            //because ast don't care the '/n' token, and isn't a node of ast
+            //so return nextToken()
+            return getNextToken();
         }
 
         if('+' == c) {
@@ -234,5 +237,5 @@ public class LEXER{
     public int getLine() {
         return this.line;
     }
-};
+}
 

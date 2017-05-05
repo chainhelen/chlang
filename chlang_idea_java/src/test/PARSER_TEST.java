@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class PARSER_TEST {
     @Test
-    public void testParser() {
+    public void testParser0() {
         LEXER lexer = new LEXER("int s = 10;string b = \"sss\";");
         PARSER parser = new PARSER(lexer);
 
@@ -25,6 +25,19 @@ public class PARSER_TEST {
             parser.BuildXmlDOC();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testParser1() {
+        LEXER lexer = new LEXER("int s = 10;\nstring b = \"ssw\";");
+        PARSER parser = new PARSER(lexer);
+
+        List<ASTNODE> listAstNode = parser.parse();
+        Iterator it = listAstNode.iterator();
+
+        while(it.hasNext()) {
+            ASTNODE astNode = (ASTNODE)it.next();
         }
     }
 }

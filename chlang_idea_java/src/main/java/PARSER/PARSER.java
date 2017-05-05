@@ -48,15 +48,40 @@ public class PARSER {
             astNodeList.add(definitionOrStatementAstNode);
         }
 //        copy list, need
-//        {
-//            List<ASTNODE> astRetList = new ArrayList<ASTNODE>();
-//            Iterator it = astNodeList.iterator();
-//            while(it.hasNext()) {
-//                ASTNODE tmpNode = (ASTNODE)it.next();
-//            }
-//            return this.astNodeList;
-//        }
-        return this.astNodeList;
+        return deepCopyAstNodeList(astNodeList);
+    }
+
+    private List<ASTNODE> deepCopyAstNodeList(List<ASTNODE> astNodeList) {
+        List<ASTNODE> reAstNodeList = new ArrayList<ASTNODE>();
+        {
+            Iterator it = astNodeList.iterator();
+            while(it.hasNext()) {
+                ASTNODE tmpNode = (ASTNODE)it.next();
+                tmpNode = deepCopyAstNode(tmpNode);
+                reAstNodeList.add(tmpNode);
+            }
+        }
+        return reAstNodeList;
+    }
+
+    private ASTNODE deepCopyAstNode(ASTNODE li) {
+        ASTNODE res = new ASTNODE();
+
+        res.setAstNodeType(li.getAstNodeType());
+        res.setValue(li.getValue());
+
+        {
+            List<ASTNODE> astTmpNodeList = li.getAllChildreNodeList();
+            Iterator it = astTmpNodeList.iterator();
+
+            while(it.hasNext()) {
+                ASTNODE curNode = (ASTNODE)it.next();
+                ASTNODE childrenCurNode = deepCopyAstNode(curNode);
+                res.insertChildrenNode(childrenCurNode);
+            }
+        }
+
+        return res;
     }
 
 // definition_or_statment
@@ -568,6 +593,6 @@ public class PARSER {
         //save
         Format format = Format.getPrettyFormat();
         XMLOutputter XMLOut = new XMLOutputter(format);
-        XMLOut.output(Doc, new FileOutputStream("./parser.xml"));
+        XMLOut.output(Doc, new FileOutputStream("./parser.output.xml"));
     }
 }
