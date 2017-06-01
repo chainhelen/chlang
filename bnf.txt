@@ -1,0 +1,198 @@
+//2017.04.28
+definition_or_statment
+    : function_definition
+    | statement
+
+function_definition
+    : Rw_Function IDENTIFIER LP parameter_`list RP block
+
+parameter_list
+    : NULL
+    | IDENTIFIER
+    | IDENTIFIER COMMA parameter_list
+
+arugument_list
+    : NULL
+    | expression
+    | expression COMMA argument_list
+
+statement_list
+    : NULL
+    | statement
+    | statement statemen_list //《自制编程语言》貌似有左递归问题
+
+expression
+    : logical_or_expression   --  //考虑到程序简单性，先直接跳过or等等逻辑运算符
+    | TYPE(int | string) IDENTIFIER ASSIGN expression
+    | IDENTIFIER ASSIGN expression
+    | additive_expression ++  //直接使用add表达子式
+
+logical_or_expression
+    : logical_and_expression
+    | logical_or_expression LOGICAL_OR logical_and_expression
+
+logical_and_expression
+    : equality_expression
+    | logical_and_expression LOGICAL_AND equality_expression
+
+equality_expression
+    : relational_expression
+    | equality_expression EQ relation_expression
+    | equality_expression NE relation_expression
+
+relational_expression
+    : additive_expression
+    | relation_expression GT additive_expression
+    | relation_expression GE additive_expression
+    | relation_expression LT additive_expression
+    | relation_expression LE additive_expression
+
+additive_expression
+    : multiplicative_expression
+    | multiplicative_expression ADD additive_expresson
+    | multiplicative_expression SUB additive_expresson
+
+multiplicative_expression
+    : unary_expression
+    | unary_expression MUL  multiplicative_expression
+    | unary_expression DIV multiplicative_expression
+    | unary_expression MOD multiplicative_expression -- //直接跳过取余
+
+unary_expression
+    : primary_expression
+    | SUB unary_expression
+
+primary_expression
+    : IDENTIFIER LP argument_list RP
+    | IDENTIFIER LP RP
+    | LP expression RP
+    | IDENTIFIER
+    | INT_LITERAL  //原子表达式
+    | STRING_LITERAL //原子表达式
+
+statement
+    : expression SEM
+    | global_statement --
+    | if_statiement --
+    | while_statement --
+    | for_statement --
+    | return_statement --
+    | break_statement --
+    | continue_statement --
+
+block
+    : LC statement_list RC
+    | LC RC
+
+	
+	
+	
+	
+	
+-----------------------
+2017.06.01 添加 if 语句	
+	
+definition_or_statment
+    : function_definition
+    | statement
+
+function_definition
+    : Rw_Function IDENTIFIER LP parameter_`list RP block
+
+parameter_list
+    : NULL
+    | IDENTIFIER
+    | IDENTIFIER COMMA parameter_list
+
+arugument_list
+    : NULL
+    | expression
+    | expression COMMA argument_list
+
+statement_list
+    : NULL
+    | statement
+    | statement statemen_list //《自制编程语言》貌似有左递归问题
+
+expression
+    : logical_or_expression   --  //考虑到程序简单性，先直接跳过or等等逻辑运算符
+    | TYPE(int | string) IDENTIFIER ASSIGN expression
+    | IDENTIFIER ASSIGN expression
+    | additive_expression ++  //直接使用add表达子式
+
+logical_or_expression
+    : logical_and_expression
+    | logical_or_expression LOGICAL_OR logical_and_expression
+
+logical_and_expression
+    : equality_expression
+    | logical_and_expression LOGICAL_AND equality_expression
+
+equality_expression
+    : relational_expression
+    | equality_expression EQ relation_expression
+    | equality_expression NE relation_expression
+
+relational_expression
+    : additive_expression
+    | relation_expression GT additive_expression
+    | relation_expression GE additive_expression
+    | relation_expression LT additive_expression
+    | relation_expression LE additive_expression
+
+additive_expression
+    : multiplicative_expression
+    | multiplicative_expression ADD additive_expresson
+    | multiplicative_expression SUB additive_expresson
+
+multiplicative_expression
+    : unary_expression
+    | unary_expression MUL  multiplicative_expression
+    | unary_expression DIV multiplicative_expression
+    | unary_expression MOD multiplicative_expression -- //直接跳过取余
+
+unary_expression
+    : primary_expression
+    | SUB unary_expression
+
+primary_expression
+    : IDENTIFIER LP argument_list RP
+    | IDENTIFIER LP RP
+    | LP expression RP
+    | IDENTIFIER
+    | INT_LITERAL  //原子表达式
+    | STRING_LITERAL //原子表达式
+	
+IfExpressionBlock
+ | RW_If LP expression RP block
+
+ElifExpressionBlock
+ | RW_Elif LP expression RP block
+
+ElseExpressionBlock
+ | RW_Else block
+
+If_statement
+  |  IfExpressionBlock (ElifExpressionBlock)*
+  |  IfExpressionBlock (ElifExpressionBlock)* ElseExpressionBlock  //此处的*表示克林闭包，非严格的bnf写法
+  
+//严格写法如下，引入List
+//注意消除左递归
+//ElifExpressionBlockList
+//  | NULL
+//  | ElifExpressionBlock ElifExpressionBlockList
+
+  
+statement
+    : expression SEM
+    | global_statement --
+    | if_statiement --
+    | while_statement --
+    | for_statement --
+    | return_statement --
+    | break_statement --
+    | continue_statement --
+
+block
+    : LC statement_list RC
+    | LC RC

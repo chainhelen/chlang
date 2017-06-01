@@ -48,8 +48,10 @@ public enum ASTNODE_TYPE {
     StatementList,
 
 //expression
-//    : logical_or_expression
+//    : logical_or_expression   --  //考虑到程序简单性，先直接跳过or等等逻辑运算符
+//    | TYPE(int | string) IDENTIFIER ASSIGN expression
 //    | IDENTIFIER ASSIGN expression
+//    | additive_expression ++  //直接使用add表达子式
     Expression,
 
 //logical_or_expression
@@ -61,12 +63,14 @@ public enum ASTNODE_TYPE {
 //logical_and_expression
 //    : equality_expression
 //    | logical_and_expression LOGICAL_AND equality_expression
+// need to write
     LogicalAndExpression,
 
 //equality_expression
 //    : relational_expression
 //    | equality_expression EQ relation_expression
 //    | equality_expression NE relation_expression
+// need to write
     EqualityExpression,
 
 //relational_expression
@@ -123,13 +127,13 @@ public enum ASTNODE_TYPE {
 
 //statement
 //    : expression SEM
-//    | global_statement
-//    | if_statiement
-//    | while_statement
-//    | for_statement
-//    | return_statement
-//    | break_statement
-//    | continue_statement
+//    | global_statement --
+//    | if_statiement ++
+//    | while_statement --
+//    | for_statement --
+//    | return_statement --
+//    | break_statement --
+//    | continue_statement --
     Statement,
 
 //block
