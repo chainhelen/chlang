@@ -9,33 +9,24 @@ import java.util.List;
  * Created by chainhelen on 2017/4/28.
  */
 
-class Value {
-    int num = 0;
-    String str = "";
-};
-
 
 public class ASTNODE {
     private ASTNODE_TYPE astNodeType = ASTNODE_TYPE.UnknownAstNode;
-    private Value value = new Value();
+    private Object value = new Object();
     private List<ASTNODE> astChidrenNodeList = new ArrayList<ASTNODE>();
 
-    public void setValue(int num) {
-        this.value.num = num;
+    public void setValue(Object value) {
+        this.value = value;
     }
 
-    public void setValue(String str) {
-        this.value.str = str;
-    }
-
-    public String getValue() {
+    public Object getValue() {
         if(ASTNODE_TYPE.Number == this.astNodeType) {
-            return this.value.num + "";
+            return (this.value);
         }
         if(ASTNODE_TYPE.UnknownAstNode == this.astNodeType) {
             return "<UnknkownAstNode>";
         }
-        return this.value.str;
+        return this.value;
     }
 
     public ASTNODE_TYPE getAstNodeType() {
@@ -67,7 +58,7 @@ public class ASTNODE {
         return this.astChidrenNodeList.get(0);
     }
 
-    public String getNodeType() {
+    public String getNodeTypeString() {
         return astNodeType.toString();
     }
 

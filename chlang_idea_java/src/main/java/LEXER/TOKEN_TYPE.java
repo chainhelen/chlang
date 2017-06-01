@@ -28,6 +28,5 @@ public enum TOKEN_TYPE {
     Num,
     String,
     Eof,
-    Function,
     UnkonwnToken
-};
+}

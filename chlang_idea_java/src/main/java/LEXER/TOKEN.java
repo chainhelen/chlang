@@ -73,6 +73,7 @@ public class TOKEN {
                 TOKEN_TYPE.RW_String == token.token_type ||
                 TOKEN_TYPE.RW_While == token.token_type ||
                 TOKEN_TYPE.RW_If == token.token_type ||
+                TOKEN_TYPE.RW_Function == token.token_type ||
 
                 TOKEN_TYPE.Mul == token.token_type ||
                 TOKEN_TYPE.Add == token.token_type ||
@@ -88,8 +89,8 @@ public class TOKEN {
                 TOKEN_TYPE.RBrace == token.token_type ||
 
                 TOKEN_TYPE.String == token.token_type ||
-                TOKEN_TYPE.Eof == token.token_type ||
-                TOKEN_TYPE.Function == token.token_type)
+                TOKEN_TYPE.Eof == token.token_type)
+
         {
             System.out.printf("The token : type = \"%s\", value = \"%s\"\n", token.getToken_type().name(), token.getStr());
         }

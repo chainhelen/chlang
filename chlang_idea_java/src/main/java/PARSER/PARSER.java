@@ -36,7 +36,7 @@ public class PARSER {
 
     public List<ASTNODE> parse() {
         if(null == lexer) {
-            System.out.println("the lexer not init in parser\n");
+            logger.error("the lexer not init in parser\n");
             System.exit(0);
         }
         this.astNodeList = new ArrayList<ASTNODE>();
@@ -94,7 +94,7 @@ public class PARSER {
         astRootNode.setAstNodeType(ASTNODE_TYPE.DefinitionOrStatement);
         astRootNode.setValue("DefinitionOrStatement");
 
-        if(TOKEN_TYPE.Function == curTok.getToken_type()) {
+        if(TOKEN_TYPE.RW_Function == curTok.getToken_type()) {
             ASTNODE functionDefinitionNode = functionDefinition();
             astRootNode.insertChildrenNode(functionDefinitionNode);
         } else {
@@ -109,18 +109,17 @@ public class PARSER {
 //    : FUNCTION IDENTIFIER LP parameter_list RP block
     private ASTNODE functionDefinition() {
         // rootAST
-        curTok = lexer.getNextToken(); // eat 'function'
         ASTNODE astRootNode = new ASTNODE();
         astRootNode.setAstNodeType(ASTNODE_TYPE.FunctionDefinition);
         astRootNode.setValue("FunctionDefinition");
         curTok = lexer.getNextToken(); // eat 'function'
-
 
         // IDENTIFIER
         {
             ASTNODE identifierAstNode = new ASTNODE();
             identifierAstNode.setAstNodeType(ASTNODE_TYPE.Identifier);
             identifierAstNode.setValue(curTok.getStr());
+            astRootNode.insertChildrenNode(identifierAstNode);
             curTok = lexer.getNextToken();
         }
 
@@ -128,7 +127,7 @@ public class PARSER {
         {
             if (TOKEN_TYPE.LParen != curTok.getToken_type()) {
                 logger.error("functionDefinition expect the LP");
-                logger.error("but get the token_type" + curTok.getToken_type());
+                logger.error("\tbut get the token_type " + curTok.getToken_type());
                 System.exit(0);
             }
             curTok = lexer.getNextToken();
@@ -223,13 +222,13 @@ public class PARSER {
                 ASTNODE expressionNode = expression();
                 argumentList.insertChildrenNode(expressionNode);
 
-                if(TOKEN_TYPE.RBrace == curTok.getToken_type()) {
+                if(TOKEN_TYPE.RParen == curTok.getToken_type()) {
                     break;
                 } else if(TOKEN_TYPE.COMMA == curTok.getToken_type()){
                     curTok = lexer.getNextToken();
                 } else{
                     logger.error("argumentList expect Rparen | COMMA ");
-                    logger.error("get the token_type " + curTok.getToken_type().toString() + "line " + lexer.getLine());
+                    logger.error("\tget the token_type " + curTok.getToken_type().toString() + "line " + lexer.getLine());
                     System.exit(0);
                 }
             }
@@ -248,7 +247,7 @@ public class PARSER {
 
         while(TOKEN_TYPE.RBrace != curTok.getToken_type()) {
             ASTNODE statementAstNode = statement();
-            statementAstNode.insertChildrenNode(statementAstNode);
+            statementListAstRootNode.insertChildrenNode(statementAstNode);
         }
         return statementListAstRootNode;
     }
@@ -275,13 +274,15 @@ public class PARSER {
             expressionAstRootNode.insertChildrenNode(astIntNode);
 
             curTok = lexer.getNextToken(); // eat "int"
-        } else if(TOKEN_TYPE.RW_String == curTok.getToken_type()) {
-            ASTNODE astStringNode = new ASTNODE();
-            astStringNode.setAstNodeType(ASTNODE_TYPE.TString);
-            astStringNode.setValue("string");
-            expressionAstRootNode.insertChildrenNode(astStringNode);
+        } else {
+            if(TOKEN_TYPE.RW_String == curTok.getToken_type()) {
+                ASTNODE astStringNode = new ASTNODE();
+                astStringNode.setAstNodeType(ASTNODE_TYPE.TString);
+                astStringNode.setValue("string");
+                expressionAstRootNode.insertChildrenNode(astStringNode);
 
-            curTok = lexer.getNextToken(); // eat "string"
+                curTok = lexer.getNextToken(); // eat "string"
+            }
         }
 
         TOKEN lookHeadToken = lexer.lookHead();
@@ -475,7 +476,7 @@ public class PARSER {
                 //IDENTIFIER
                 ASTNODE identifierAstNode = new ASTNODE();
                 identifierAstNode.setAstNodeType(ASTNODE_TYPE.Identifier);
-                identifierAstNode.setValue("Identifier");
+                identifierAstNode.setValue(curTok.getStr());
                 primaryExpressionAstRootNode.insertChildrenNode(identifierAstNode);
 
                 //if next is LP
@@ -531,7 +532,10 @@ public class PARSER {
             // SEM
             if(TOKEN_TYPE.Sem != curTok.getToken_type()) {
                 logger.error("statement Sem expect token_type " + TOKEN_TYPE.Sem.toString());
-                logger.error("get the token_type " + curTok.getToken_type().toString() + " line " + lexer.getLine());
+                logger.error("\tget the token_type => " + curTok.getToken_type().toString()
+                        + " ; line = " + lexer.getLine()
+                        + " ; columne = " + lexer.getCurColumn()
+                );
                 System.exit(0);
             }
             curTok = lexer.getNextToken();
@@ -569,8 +573,8 @@ public class PARSER {
             while(it.hasNext()) {
                 ASTNODE astNode = (ASTNODE)it.next();
 
-                Element ele = new Element(astNode.getNodeType());
-                ele.addContent(new Element("value").setText(astNode.getValue()));
+                Element ele = new Element(astNode.getNodeTypeString());
+                ele.addContent(new Element("value").setText(astNode.getValue().toString()));
 
                 List<ASTNODE> childrenNodeList = astNode.getAllChildreNodeList();
                 if(null != childrenNodeList && 0 != childrenNodeList.size()) {

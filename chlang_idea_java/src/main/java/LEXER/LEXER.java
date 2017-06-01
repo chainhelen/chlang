@@ -7,6 +7,7 @@ import java.util.*;
  */
 public class LEXER{
     private int line = 0;
+    private int curLineFirstCharPosInSrcCode;
     private int srcCurPos = 0;
     private String src = "";
 
@@ -14,6 +15,7 @@ public class LEXER{
     private Map<String, TOKEN> reservedWordTable = new TreeMap<String, TOKEN>();
 
     public LEXER(String src) {
+        this.line = 1;
         this.src = reservedWords;
 
         for(TOKEN_TYPE token_type : TOKEN_TYPE.values()) {
@@ -28,6 +30,7 @@ public class LEXER{
             }
         }
         this.src = src;
+        this.curLineFirstCharPosInSrcCode = 0;
         this.srcCurPos = 0;
     }
 
@@ -109,6 +112,7 @@ public class LEXER{
 
             while(srcCurPos < srcLen) {
                 if('\n' == src.charAt(srcCurPos)) {
+                    curLineFirstCharPosInSrcCode = srcCurPos;
                     line++;
                 }
 
@@ -134,6 +138,7 @@ public class LEXER{
             token.setStr("\\n");
             line++;
 
+            curLineFirstCharPosInSrcCode = srcCurPos;
             srcCurPos++;
 
             //if return current token directly, maybe cause error
@@ -237,5 +242,7 @@ public class LEXER{
     public int getLine() {
         return this.line;
     }
+
+    public int getCurColumn() { return this.srcCurPos - this.curLineFirstCharPosInSrcCode;}
 }
 

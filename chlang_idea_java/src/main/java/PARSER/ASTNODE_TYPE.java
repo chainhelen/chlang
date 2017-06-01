@@ -121,4 +121,4 @@ public enum ASTNODE_TYPE {
     Block,
 
     UnknownAstNode
-};
+}
