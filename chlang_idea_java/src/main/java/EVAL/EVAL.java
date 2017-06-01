@@ -329,9 +329,37 @@ public class EVAL {
                 logger.error("Error at primaryExpression , Not get any vaild AstNodeType");
                 System.exit(0);
             }
+        } else if(ASTNODE_TYPE.IfStatement == nodeType) {
+            List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
+            int len = astNodeList.size();
+            for(int i = 0;i < len;i++) {
+                ASTNODE curAstNode = astNodeList.get(i);
+                if (ASTNODE_TYPE.IfExpressionBlock == curAstNode.getAstNodeType()
+                        || ASTNODE_TYPE.ElifExpressionBlock == curAstNode.getAstNodeType()) {
+                    ASTNODE expressionAstNode = curAstNode.getFirstChildrenNode();
+                    recursionEvalAstNode(expressionAstNode);
+                    Object res = this.expResStack.pop();
+                    if(!(res.getClass() == java.lang.Integer.class && 0 == (int)res)) {
+                        ASTNODE blockAstNode = curAstNode.getLastChildrenNode();
+                        recursionEvalAstNode(blockAstNode);
+                        break;
+                    }
+                }
+                if (ASTNODE_TYPE.ElseExpressionBlock == curAstNode.getAstNodeType()){
+                    ASTNODE blockAstNode = curAstNode.getLastChildrenNode();
+                    recursionEvalAstNode(blockAstNode);
+                }
+            }
         } else if(ASTNODE_TYPE.Statement == nodeType) {
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
-            recursionEvalAstNode(astNodeList.get(0));
+            ASTNODE theFirstAstNode = astNodeList.get(0);
+
+            if(ASTNODE_TYPE.Expression == theFirstAstNode.getAstNodeType()) {
+                recursionEvalAstNode(astNodeList.get(0));
+            } else if(ASTNODE_TYPE.IfStatement == theFirstAstNode.getAstNodeType()) {
+                recursionEvalAstNode(astNodeList.get(0));
+            }
+
         } else if(ASTNODE_TYPE.Block == nodeType) {
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             scopeCtr.enterNewScope();

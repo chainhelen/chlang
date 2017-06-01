@@ -10,6 +10,8 @@ public enum TOKEN_TYPE {
     RW_String,
     RW_While,
     RW_If,
+    RW_Elif,
+    RW_Else,
     RW_Function,
 
     Mul,

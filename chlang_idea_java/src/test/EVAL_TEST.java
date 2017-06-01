@@ -13,6 +13,7 @@ public class EVAL_TEST {
     @Test
     public void EvalTest() {
         String src = "string s = \"sss\";\n";
+        src += "1 + 2;\n";
         src += "string s1 = s + 1;\n";
         src += "int n = 0;\n";
         src += "println(s1);\n";

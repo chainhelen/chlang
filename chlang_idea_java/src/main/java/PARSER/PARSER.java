@@ -507,10 +507,113 @@ public class PARSER {
 
     }
 
+//if_statement
+//  |  IfExpressionBlock (ElifExpressionBlock)*
+//  |  IfExpressionBlock (ElifExpressionBlock)* ElseExpressionBlock
+    private ASTNODE ifstatement() {
+        ASTNODE ifStatementAstNode = new ASTNODE();
+        ifStatementAstNode.setAstNodeType(ASTNODE_TYPE.IfStatement);
+        ifStatementAstNode.setValue("IfStatement");
+
+        // IfExpressionBlock
+        {
+            ASTNODE ifExpressionBlock = new ASTNODE();
+            ifExpressionBlock.setAstNodeType(ASTNODE_TYPE.IfExpressionBlock);
+            ifExpressionBlock.setValue("IfExpressionBlock");
+
+            curTok = lexer.getNextToken(); // eat RW_If
+            if(TOKEN_TYPE.LParen != curTok.getToken_type()) { //check the LParen
+                logger.error("IfExpressionBlock Expect the \"(\" ,  the type = " + TOKEN_TYPE.LParen.toString());
+                logger.error("\tget the type = " + curTok.getToken_type());
+                System.exit(0);
+            }
+            curTok = lexer.getNextToken(); // eat LParen
+
+            ASTNODE expressionAstNode = expression();
+            ifExpressionBlock.insertChildrenNode(expressionAstNode);
+
+            if(TOKEN_TYPE.RParen != curTok.getToken_type()) { //check the RParen
+                logger.error("IfExpressionBlock Expect the \")\" ,  the type = " + TOKEN_TYPE.RParen.toString());
+                logger.error("\tget the type = " + curTok.getToken_type());
+                System.exit(0);
+            }
+            curTok = lexer.getNextToken(); // eat RParen
+
+             if(TOKEN_TYPE.LBrace != curTok.getToken_type()) { //block statement, check the LBrace
+                logger.error("IfExpressionBlock Expect block,  the first token type = " + TOKEN_TYPE.LBrace.toString());
+                logger.error("\tget the type = " + curTok.getToken_type());
+                System.exit(0);
+            }
+
+            ASTNODE blockAstNode = block();
+            ifExpressionBlock.insertChildrenNode(blockAstNode);
+
+            ifStatementAstNode.insertChildrenNode(ifExpressionBlock);
+        }
+
+        //ElifExpressionBlock
+        {
+            while(TOKEN_TYPE.RW_Elif == curTok.getToken_type()) {
+                ASTNODE elifExpressionBlock = new ASTNODE();
+                elifExpressionBlock.setAstNodeType(ASTNODE_TYPE.ElifExpressionBlock);
+                elifExpressionBlock.setValue("ElifExpressionBlock");
+
+                curTok = lexer.getNextToken(); // eat RW_Elif
+                if(TOKEN_TYPE.LParen != curTok.getToken_type()) { //check the LParen
+                    logger.error("ElifExpressionBlock Expect the \"(\" ,  the type = " + TOKEN_TYPE.LParen.toString());
+                    logger.error("\tget the type = " + curTok.getToken_type());
+                    System.exit(0);
+                }
+                curTok = lexer.getNextToken(); // eat LParen
+
+                ASTNODE expressionAstNode = expression();
+                elifExpressionBlock.insertChildrenNode(expressionAstNode);
+                if(TOKEN_TYPE.RParen != curTok.getToken_type()) { //check the RParen
+                    logger.error("ElifExpressionBlock Expect the \")\" ,  the type = " + TOKEN_TYPE.RParen.toString());
+                    logger.error("\tget the type = " + curTok.getToken_type());
+                    System.exit(0);
+                }
+                curTok = lexer.getNextToken(); // eat RParen
+
+                if(TOKEN_TYPE.LBrace != curTok.getToken_type()) { //block statement, check the LBrace
+                    logger.error(" ElifExpressionBlock Expect block,  the first token type = " + TOKEN_TYPE.LBrace.toString());
+                    logger.error("\tget the type = " + curTok.getToken_type());
+                    System.exit(0);
+                }
+
+                ASTNODE blockAstNode = block();
+                elifExpressionBlock.insertChildrenNode(blockAstNode);
+
+                ifStatementAstNode.insertChildrenNode(elifExpressionBlock);
+            }
+        }
+
+        {
+            if(TOKEN_TYPE.RW_Else == curTok.getToken_type()) {
+                ASTNODE elseExpressionBlock = new ASTNODE();
+                elseExpressionBlock.setAstNodeType(ASTNODE_TYPE.ElseExpressionBlock);
+                elseExpressionBlock.setValue("ElseExpressionBlock");
+
+                if(TOKEN_TYPE.LBrace != curTok.getToken_type()) { //block statement, check the LBrace
+                    logger.error(" ElseExpressionBlock Expect block,  the first token type = " + TOKEN_TYPE.LBrace.toString());
+                    logger.error("\tget the type = " + curTok.getToken_type());
+                    System.exit(0);
+                }
+
+                ASTNODE blockAstNode = block();
+                elseExpressionBlock.insertChildrenNode(blockAstNode);
+
+                ifStatementAstNode.insertChildrenNode(elseExpressionBlock);
+            }
+        }
+
+        return ifStatementAstNode;
+    }
+
 //statement
 //    : expression SEM
 //    | global_statement --
-//    | if_statiement --
+//    | if_statiement ++
 //    | while_statement --
 //    | for_statement --
 //    | return_statement --
@@ -520,6 +623,14 @@ public class PARSER {
         ASTNODE statementAstNode = new ASTNODE();
         statementAstNode.setAstNodeType(ASTNODE_TYPE.Statement);
         statementAstNode.setValue("Statement");
+
+        //if_statement
+        if(TOKEN_TYPE.RW_If == curTok.getToken_type())
+        {
+            ASTNODE ifStatementAstNode = ifstatement();
+            statementAstNode.insertChildrenNode(ifStatementAstNode);
+            return statementAstNode;
+        }
 
         // expression SEM
         {

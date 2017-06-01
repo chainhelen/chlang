@@ -26,7 +26,7 @@ public enum ASTNODE_TYPE {
     DefinitionOrStatement,
 
 //function_definition
-//    : FUNCTION IDENTIFIER LP parameter_`list RP block
+//    : Rw_Function IDENTIFIER LP parameter_`list RP block
     FunctionDefinition,
 
 //parameter_list
@@ -103,6 +103,23 @@ public enum ASTNODE_TYPE {
 //    | INT_LITERAL
 //    | STRING_LITERAL
     PrimaryExpression,
+
+//IfExpressionBlock
+// | RW_If LP expression RP block
+    IfExpressionBlock,
+
+//ElifExpressionBlock
+// | RW_Elif LP expression RP block
+    ElifExpressionBlock,
+
+//ElseExpressionBlock
+// | RW_Else block
+    ElseExpressionBlock,
+
+//If_statement
+//  |  IfExpressionBlock (ElifExpressionBlock)*
+//  |  IfExpressionBlock (ElifExpressionBlock)* ElseExpressionBlock
+    IfStatement,
 
 //statement
 //    : expression SEM
