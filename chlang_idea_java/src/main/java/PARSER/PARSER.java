@@ -709,6 +709,6 @@ public class PARSER {
         //save
         Format format = Format.getPrettyFormat();
         XMLOutputter XMLOut = new XMLOutputter(format);
-        XMLOut.output(Doc, new FileOutputStream("./parser.output.xml"));
+        XMLOut.output(Doc, new FileOutputStream("./target/parser.output.xml"));
     }
 }
