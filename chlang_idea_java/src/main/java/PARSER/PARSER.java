@@ -594,6 +594,7 @@ public class PARSER {
                 elseExpressionBlock.setAstNodeType(ASTNODE_TYPE.ElseExpressionBlock);
                 elseExpressionBlock.setValue("ElseExpressionBlock");
 
+                curTok = lexer.getNextToken(); // eat RW_Else
                 if(TOKEN_TYPE.LBrace != curTok.getToken_type()) { //block statement, check the LBrace
                     logger.error(" ElseExpressionBlock Expect block,  the first token type = " + TOKEN_TYPE.LBrace.toString());
                     logger.error("\tget the type = " + curTok.getToken_type());
