@@ -13,7 +13,35 @@ import java.util.List;
 public class ASTNODE {
     private ASTNODE_TYPE astNodeType = ASTNODE_TYPE.UnknownAstNode;
     private Object value = new Object();
-    private List<ASTNODE> astChidrenNodeList = new ArrayList<ASTNODE>();
+    private List<ASTNODE> astChildrenNodeList = new ArrayList<ASTNODE>();
+    private ASTNODE parentNode = null;
+    private ASTNODE nextNode = null;
+    private ASTNODE prevNode = null;
+
+    public ASTNODE getNextNode() {
+        return nextNode;
+    }
+
+    private void setNextNode(ASTNODE nextNode) {
+        this.nextNode = nextNode;
+    }
+
+    public ASTNODE getPrevNode() {
+        return prevNode;
+    }
+
+    private void setPrevNode(ASTNODE prevNode) {
+        this.prevNode = prevNode;
+    }
+
+    public ASTNODE getParentNode() {
+        return parentNode;
+    }
+
+    private void setParentNode(ASTNODE parentNode) {
+        this.parentNode = parentNode;
+    }
+
 
     public void setValue(Object value) {
         this.value = value;
@@ -38,41 +66,53 @@ public class ASTNODE {
     }
 
     public List<ASTNODE>getAllChildreNodeList () {
-        return this.astChidrenNodeList;
+        return this.astChildrenNodeList;
     }
 
     public boolean hasChildrenNode() {
-        return this.astChidrenNodeList.size() > 0 ? true : false;
+        return this.astChildrenNodeList.size() > 0 ? true : false;
     }
 
     public ASTNODE getLastChildrenNode() {
-        if(0 == this.astChidrenNodeList.size())
+        if(0 == this.astChildrenNodeList.size())
             return null;
-        int size = this.astChidrenNodeList.size();
-        return this.astChidrenNodeList.get(size - 1);
+        int size = this.astChildrenNodeList.size();
+        return this.astChildrenNodeList.get(size - 1);
     }
 
     public ASTNODE getFirstChildrenNode() {
-        if(0 == this.astChidrenNodeList.size())
+        if(0 == this.astChildrenNodeList.size())
             return null;
-        return this.astChidrenNodeList.get(0);
+        return this.astChildrenNodeList.get(0);
     }
 
     public String getNodeTypeString() {
         return astNodeType.toString();
     }
 
-    public void insertChildrenNode(ASTNODE node) {
-        if(null != node) {
-            this.astChidrenNodeList.add(node);
+    public void insertChildrenNode(ASTNODE curNode) {
+        if(null != curNode) {
+            if(true == hasChildrenNode()) {
+                //handle lastNode : Next
+                ASTNODE lastNode = getLastChildrenNode();
+                lastNode.setNextNode(curNode);
+                //handle curNode : Next Prev
+                curNode.setNextNode(null);
+                curNode.setPrevNode(lastNode);
+            }
+            //handle curNode : parent
+            curNode.setParentNode(this);
+
+            this.astChildrenNodeList.add(curNode);
         }
     }
 
+    /*
     public void insertChildrenNodeList(List list) {
         Iterator it = list.iterator();
         while(it.hasNext()) {
             ASTNODE parameter = (ASTNODE)it.next();
             this.insertChildrenNode(parameter);
         }
-    }
+    }*/
 }

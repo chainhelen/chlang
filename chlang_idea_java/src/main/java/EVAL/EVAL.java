@@ -16,74 +16,150 @@ import java.util.Stack;
  * Created by chainhelen on 2017/5/21.
  */
 
+enum CtrFlowFlag {
+    RETURN,
+    BREAK,
+    CONTINUE,
+    NEXT
+}
+
+class ScopeNode {
+    public SCOPE getScopeValue() {
+        return scopeValue;
+    }
+
+    public void setScopeValue(SCOPE scopeValue) {
+        this.scopeValue = scopeValue;
+    }
+
+    private SCOPE scopeValue;
+    private List<ScopeNode> scopeNodeChildren;
+    private ScopeNode parentScopeNode;
+
+    public ScopeNode() {
+        scopeValue = new SCOPE();
+        scopeNodeChildren = new ArrayList<ScopeNode>();
+        parentScopeNode = null;
+    }
+
+    public ScopeNode insertChildrenScopNode(SCOPE scope) {
+        ScopeNode scopeNode = new ScopeNode();
+        scopeNode.scopeValue = scope;
+        return insertChildrenScopNode(scopeNode);
+    }
+    public ScopeNode insertChildrenScopNode(ScopeNode scopeNode) {
+        if(null == scopeNodeChildren || 0 == scopeNodeChildren.size()) {
+            scopeNodeChildren.add(scopeNode);
+        }
+        scopeNode.parentScopeNode = this;
+        return  scopeNode;
+    }
+    public void insertSymbol(SYMBOL symbol) {
+        SCOPE curScope = this.getScopeValue();
+        curScope.insertSymbol(symbol);
+    }
+    public ScopeNode getParentScopeNode() {
+        return this.parentScopeNode;
+    }
+    public SYMBOL getSymbolByNameFromScopeNode(String name) {
+        SCOPE curScope = this.getScopeValue();
+        SYMBOL symbol = curScope.getSymbolByName(name);
+        return symbol;
+    }
+}
+
 class ScopeCtr {
-    private List<SCOPE> scopeList;
+    private ScopeNode scopeRootNode;
+    private ScopeNode curScopeNode;
 
     protected void initScopeList() {
-        scopeList = new ArrayList<SCOPE>();
-        scopeList.add(new SCOPE());
+        scopeRootNode = new ScopeNode();
+        curScopeNode = scopeRootNode;
     }
 
     protected void addSymbolInCurScope(SYMBOL symbol) {
-        int index = scopeList.size() - 1;
-        if(index < 0) {
-            return ;
+        if(null == scopeRootNode) {
+            return;
         }
-        SCOPE curScope = scopeList.get(index);
-        curScope.insertSymbol(symbol);
+        curScopeNode.insertSymbol(symbol);
     }
 
     protected void enterNewScope() {
-        scopeList.add(new SCOPE());
+        curScopeNode = curScopeNode.insertChildrenScopNode(new ScopeNode());
     }
 
-    protected SCOPE getCurScope() {
-        int index = scopeList.size() - 1;
-        if(index < 0) {
-            return new SCOPE();
-        }
-        return scopeList.get(index);
-    }
+//    protected SCOPE getCurScope() {
+//        if(null == curScopeNode) {
+//            System.out.println("null == curScope");
+//            System.exit(0);
+//        }
+//        SCOPE curScope = curScopeNode.getScopeValue();
+//        return curScope;
+//    }
 
     protected SYMBOL getSymbolByName(String name) {
-        int scopeIndex = scopeList.size() - 1;
-        while(scopeIndex >= 0) {
-            SCOPE curScope = scopeList.get(scopeIndex);
-            SYMBOL symbol = curScope.getSymbolByName(name);
+        ScopeNode scopeNode = curScopeNode;
+        SYMBOL symbol =  null;
+
+        while(null != scopeNode) {
+            symbol = scopeNode.getSymbolByNameFromScopeNode(name);
             if(null != symbol) {
                 return symbol;
             }
-            scopeIndex--;
+            scopeNode = scopeNode.getParentScopeNode();
         }
-        return null;
+        return symbol;
     }
 
-    protected void removeCurScope() {
-        int index = scopeList.size() - 1;
-        if(index >= 0) {
-            scopeList.remove(index);
-        }
+//    protected void removeCurScope() {
+//        int index = scopeList.size() - 1;
+//        if(index >= 0) {
+//            scopeList.remove(index);
+//        }
+//    }
+
+    protected void backTraceCurScope() {
+        curScopeNode = curScopeNode.getParentScopeNode();
     }
 
-    protected void clearScopeList()  {
-        while(true) {
-            if(scopeList.size() == 0) {
-                return ;
-            }
-            scopeList.remove(0);
-        }
-    }
+//    protected void clearScopeList()  {
+//        while(true) {
+//            if(scopeList.size() == 0) {
+//                return ;
+//            }
+//            scopeList.remove(0);
+//        }
+//    }
 }
 
 public class EVAL {
     private ScopeCtr scopeCtr = new ScopeCtr();
     private Stack expResStack = new Stack();
+    private CtrFlowFlag ctrFlowFlag = CtrFlowFlag.NEXT;
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private void recursionEvalAstNode(ASTNODE parentNode) {
         if(null == parentNode){
             System.exit(0);
         }
+
+
+        //control flow
+        //return
+        if(CtrFlowFlag.RETURN == ctrFlowFlag) {
+            return;
+        }
+
+        //control flow
+        //break
+        if(CtrFlowFlag.BREAK == ctrFlowFlag) {
+        }
+
+        //control flow
+        //continue
+        if(CtrFlowFlag.CONTINUE == ctrFlowFlag) {
+        }
+
 
         ASTNODE_TYPE nodeType = parentNode.getAstNodeType();
 
@@ -113,10 +189,14 @@ public class EVAL {
         } else if(ASTNODE_TYPE.ArgumentList == nodeType) {
 
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
+            List res = new ArrayList();
             for(int i = astNodeList.size() - 1;i >= 0;i--) {
                 recursionEvalAstNode(astNodeList.get(i));
+                res.add(this.expResStack.pop());
             }
-
+            for(int i = 0;i < res.size();i++) {
+                this.expResStack.push(res.get(i));
+            }
         } else if(ASTNODE_TYPE.StatementList == nodeType) {
 
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
@@ -312,7 +392,8 @@ public class EVAL {
                         scopeCtr.enterNewScope();
                         recursionEvalAstNode(parameterList);
                         recursionEvalAstNode(funcBody);
-                        scopeCtr.removeCurScope();
+                        ctrFlowFlag = CtrFlowFlag.NEXT;
+                        scopeCtr.backTraceCurScope();
                     }
                     if (SYMBOL_TYPE.INT == symbol.getType()) {
                         execIntFunction((int)symbol.getValue(), astNodeList.get(1).getAllChildreNodeList().size());
@@ -350,6 +431,11 @@ public class EVAL {
                     recursionEvalAstNode(blockAstNode);
                 }
             }
+        } else if(ASTNODE_TYPE.ReturnStatement == nodeType) {
+            ASTNODE expressionAstNode  = parentNode.getFirstChildrenNode();
+            recursionEvalAstNode(expressionAstNode);
+            //check the path to ancestor include functionStatement
+            ctrFlowFlag = CtrFlowFlag.RETURN;
         } else if(ASTNODE_TYPE.Statement == nodeType) {
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             ASTNODE theFirstAstNode = astNodeList.get(0);
@@ -358,13 +444,15 @@ public class EVAL {
                 recursionEvalAstNode(astNodeList.get(0));
             } else if(ASTNODE_TYPE.IfStatement == theFirstAstNode.getAstNodeType()) {
                 recursionEvalAstNode(astNodeList.get(0));
+            } else if(ASTNODE_TYPE.ReturnStatement == theFirstAstNode.getAstNodeType()) {
+                recursionEvalAstNode(astNodeList.get(0));
             }
 
         } else if(ASTNODE_TYPE.Block == nodeType) {
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             scopeCtr.enterNewScope();
             recursionEvalAstNode(astNodeList.get(0));
-            scopeCtr.removeCurScope();
+            scopeCtr.backTraceCurScope();
         } else {
             System.exit(0);
         }
@@ -401,11 +489,10 @@ public class EVAL {
         this.expResStack = new Stack();
     }
 
-    public void run(ASTNODE rootNode) {
+    private void run(ASTNODE rootNode) {
         if(null == rootNode) {
             return ;
         }
-        init();
         recursionEvalAstNode(rootNode);
     }
 
@@ -415,6 +502,6 @@ public class EVAL {
         }
         init();
         for(int i = 0;i < rootNodeList.size();i++)
-            recursionEvalAstNode(rootNodeList.get(i));
+            run(rootNodeList.get(i));
     }
 }

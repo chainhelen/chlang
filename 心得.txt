@@ -80,3 +80,6 @@ time_wait  ->           closed
 10.
 return 3;
 只有在function中才有效，nodejs文件中之所有可以直接return，是因为nodejs模块其实外面包裹着一层函数
+
+
+11.为了实现闭包，携带上下文信息

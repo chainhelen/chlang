@@ -163,10 +163,6 @@ public class PARSER {
 //    | IDENTIFIER
 //    | parameter_list COMMA IDENTIFIER
     private ASTNODE parameterList() {
-        if(TOKEN_TYPE.RParen == curTok.getToken_type()) {
-            return null;
-        }
-
         ASTNODE parameterListAstRootNode = new ASTNODE();
         parameterListAstRootNode.setAstNodeType(ASTNODE_TYPE.ParameterList);
         parameterListAstRootNode.setValue("ParameterList");
@@ -208,7 +204,10 @@ public class PARSER {
     private ASTNODE argumentList() {
         // NULL
         if(TOKEN_TYPE.RParen == curTok.getToken_type()) {
-            return (new ASTNODE());
+            ASTNODE argumentList = new ASTNODE();
+            argumentList.setAstNodeType(ASTNODE_TYPE.ArgumentList);
+            argumentList.setValue("ArgumentList");
+            return argumentList;
         }
 
         //expression
@@ -510,7 +509,7 @@ public class PARSER {
 //if_statement
 //  |  IfExpressionBlock (ElifExpressionBlock)*
 //  |  IfExpressionBlock (ElifExpressionBlock)* ElseExpressionBlock
-    private ASTNODE ifstatement() {
+    private ASTNODE ifStatement() {
         ASTNODE ifStatementAstNode = new ASTNODE();
         ifStatementAstNode.setAstNodeType(ASTNODE_TYPE.IfStatement);
         ifStatementAstNode.setValue("IfStatement");
@@ -611,13 +610,34 @@ public class PARSER {
         return ifStatementAstNode;
     }
 
+    private ASTNODE returnStatement() {
+        ASTNODE returnStatementAstNode = new ASTNODE();
+        returnStatementAstNode.setAstNodeType(ASTNODE_TYPE.ReturnStatement);
+        returnStatementAstNode.setValue("ReturnStatement");
+
+        curTok = lexer.getNextToken(); //eat "return"
+
+        ASTNODE expressionAstNode = expression();
+
+        if(TOKEN_TYPE.Sem != curTok.getToken_type()) {
+            logger.error(" ReturnStatement Expect token type = " + TOKEN_TYPE.Sem);
+            logger.error("\tbut get the type = " + curTok.getToken_type());
+            System.exit(0);
+        }
+        returnStatementAstNode.insertChildrenNode(expressionAstNode);
+
+        curTok = lexer.getNextToken(); // eat ";"
+
+        return returnStatementAstNode;
+    }
+
 //statement
 //    : expression SEM
 //    | global_statement --
 //    | if_statiement ++
 //    | while_statement --
 //    | for_statement --
-//    | return_statement --
+//    | return_statement ++
 //    | break_statement --
 //    | continue_statement --
     private ASTNODE statement() {
@@ -628,8 +648,15 @@ public class PARSER {
         //if_statement
         if(TOKEN_TYPE.RW_If == curTok.getToken_type())
         {
-            ASTNODE ifStatementAstNode = ifstatement();
+            ASTNODE ifStatementAstNode = ifStatement();
             statementAstNode.insertChildrenNode(ifStatementAstNode);
+            return statementAstNode;
+        }
+
+        //return_statement
+        if(TOKEN_TYPE.RW_Return == curTok.getToken_type()) {
+            ASTNODE returnStatementAstNode = returnStatement();
+            statementAstNode.insertChildrenNode(returnStatementAstNode);
             return statementAstNode;
         }
 

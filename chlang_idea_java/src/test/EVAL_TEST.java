@@ -65,4 +65,24 @@ public class EVAL_TEST {
         EVAL eval = new EVAL();
         eval.run(listAstNode);
     }
+
+    @Test
+    public void ReturnTest() {
+        String src = "";
+        src += "function addOne(s) { return s + \"1\"; s = s + 2;}\n";
+        src += "string s = addOne(10);";
+        src += "println(s);\n";
+
+        src += "function addOne(s) { return s + 1; s = s + 2;}\n";
+        src += "int s = addOne(10);";
+        src += "println(s);\n";
+
+        LEXER lexer = new LEXER(src);
+        PARSER parser = new PARSER(lexer);
+
+        List<ASTNODE> listAstNode = parser.parse();
+
+        EVAL eval = new EVAL();
+        eval.run(listAstNode);
+    }
 }

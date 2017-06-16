@@ -12,6 +12,7 @@ public enum TOKEN_TYPE {
     RW_If,
     RW_Elif,
     RW_Else,
+    RW_Return,
     RW_Function,
 
     Mul,

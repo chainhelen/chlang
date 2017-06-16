@@ -11,7 +11,7 @@ public class LEXER{
     private int srcCurPos = 0;
     private String src = "";
 
-    private final static String reservedWords = "int string while if elif else function";
+    private final static String reservedWords = "int string while if elif else return function";
     private Map<String, TOKEN> reservedWordTable = new TreeMap<String, TOKEN>();
 
     public LEXER(String src) {
