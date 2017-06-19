@@ -205,11 +205,12 @@ public class EVAL {
             }
 
         } else if(ASTNODE_TYPE.Expression == nodeType) {
-             //expression
-            //    : logical_or_expression   --
+            //expression
+            //    : logical_or_expression   --  //考虑到程序简单性，先直接跳过or等等逻辑运算符
             //    | TYPE(int | string) IDENTIFIER ASSIGN expression
             //    | IDENTIFIER ASSIGN expression
-            //    | additive_expression ++
+            //    | additive_expression --  //为了添加关系运算符, relation 比 additive more primitive
+            //    | equality_expression ++
 
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             if(astNodeList.size() <= 0) {
@@ -256,7 +257,7 @@ public class EVAL {
                     System.exit(0);
                 }
 
-            } else if(ASTNODE_TYPE.AddExpression == childrenNode.getAstNodeType()) {  //logical_or_expression
+            } else if(ASTNODE_TYPE.EqualityExpression == childrenNode.getAstNodeType()) {
                 recursionEvalAstNode(childrenNode);
             } else {
                 System.out.printf("Expect the first astNode is Identifier | logicalOrExperssion but get %s",
@@ -264,6 +265,93 @@ public class EVAL {
                 );
                 System.exit(0);
             }
+        } else if(ASTNODE_TYPE.EqualityExpression == nodeType) {
+            //equality_expression
+            //    : relational_expression
+            //    | relation_expression EQ equality_expression
+            //    | relation_expression NE equality_expression
+            List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
+            recursionEvalAstNode(astNodeList.get(0));
+            Object relRes = this.expResStack.pop();
+            Object res = relRes;
+
+            if(astNodeList.size() >= 3) {
+                recursionEvalAstNode(astNodeList.get(2));
+                Object equRes = this.expResStack.pop();
+
+                if(java.lang.Integer.class == relRes.getClass()
+                        && java.lang.Integer.class == equRes.getClass()) { // int int
+                    if((int)relRes == (int)equRes) {
+                        res = 1;
+                    } else {
+                        res = 0;
+                    }
+                } else if(java.lang.Integer.class == relRes.getClass()
+                        && java.lang.String.class == equRes.getClass()) {  // int string
+                    res = 0;
+                } else if(java.lang.String.class == relRes.getClass()
+                        && java.lang.Integer.class == equRes.getClass()) { // string int
+                    res = 0;
+                } else if(java.lang.String.class == equRes.getClass()
+                        && java.lang.String.class == relRes.getClass()) { // string string
+                    if(((String)equRes).equals((String)relRes)) {
+                        res = 1;
+                    } else {
+                        res = 0;
+                    }
+                } else {
+                    res = 0;
+                }
+
+                if(ASTNODE_TYPE.Eq == astNodeList.get(1).getAstNodeType()) {
+                    res = res;
+                } else if(ASTNODE_TYPE.Ne == astNodeList.get(1).getAstNodeType()){
+                    res = -1 * (int)res;
+                }
+            }
+
+            this.expResStack.push(res);
+        } else if(ASTNODE_TYPE.RelationExpression == nodeType) {
+            //relational_expression
+            //    : additive_expression
+            //    | additive_expression GT relation_expression
+            //    | additive_expression GE relation_expression
+            //    | additive_expression LT relation_expression
+            //    | additive_expression LE relation_expression
+            List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
+            recursionEvalAstNode(astNodeList.get(0));
+            Object addRes = this.expResStack.pop();
+            Object res = addRes;
+
+            if(astNodeList.size() >= 3) {
+                recursionEvalAstNode(astNodeList.get(2));
+                Object relRes = this.expResStack.pop();
+
+                ASTNODE operAstNode = astNodeList.get(1);
+                if(java.lang.Integer.class != addRes.getClass() ||
+                        java.lang.Integer.class != relRes.getClass()) {
+                    logger.error("Cound not Support the Compare between " + addRes.getClass() + " " + relRes.getClass());
+                        System.exit(0);
+                }
+
+                if(ASTNODE_TYPE.Ge == operAstNode.getAstNodeType()) {
+                    res = (int)addRes >= (int)relRes ? 1 : 0;
+                }
+
+                if(ASTNODE_TYPE.Gt == operAstNode.getAstNodeType()) {
+                    res = (int)addRes > (int)relRes ? 1 : 0;
+                }
+
+                if(ASTNODE_TYPE.Le == operAstNode.getAstNodeType()) {
+                    res = (int)addRes <= (int)relRes ? 1 : 0;
+                }
+
+                if(ASTNODE_TYPE.Lt == operAstNode.getAstNodeType()) {
+                    res = (int)addRes < (int)relRes ? 1 : 0;
+                }
+            }
+
+            this.expResStack.push(res);
         } else if(ASTNODE_TYPE.AddExpression == nodeType) {
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             recursionEvalAstNode(astNodeList.get(0));

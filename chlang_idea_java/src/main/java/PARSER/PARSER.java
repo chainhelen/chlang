@@ -251,19 +251,16 @@ public class PARSER {
         return statementListAstRootNode;
     }
 
- //expression
-//    : logical_or_expression   --
+//expression
+//    : logical_or_expression   --  //考虑到程序简单性，先直接跳过or等等逻辑运算符
 //    | TYPE(int | string) IDENTIFIER ASSIGN expression
 //    | IDENTIFIER ASSIGN expression
-//    | additive_expression ++
+//    | additive_expression --  //为了添加关系运算符, relation 比 additive more primitive
+//    | equality_expression ++
     private ASTNODE expression() {
         ASTNODE expressionAstRootNode = new ASTNODE();
         expressionAstRootNode.setAstNodeType(ASTNODE_TYPE.Expression);
         expressionAstRootNode.setValue("expression");
-
-        //need to write
-        {
-        }
 
         // String | Int
         if(TOKEN_TYPE.RW_Int == curTok.getToken_type()) {
@@ -317,10 +314,102 @@ public class PARSER {
 
             return expressionAstRootNode;
         } else { // additive_expression ++
-            ASTNODE addExpressionAstNode = additiveExpression();
-            expressionAstRootNode.insertChildrenNode(addExpressionAstNode);
+            ASTNODE equalityExpressionAstNode = equalityExpression();
+            expressionAstRootNode.insertChildrenNode(equalityExpressionAstNode);
         }
         return expressionAstRootNode;
+    }
+
+//equality_expression
+//    : relational_expression
+//    | relation_expression EQ equality_expression
+//    | relation_expression NE equality_expression
+    private ASTNODE equalityExpression() {
+        ASTNODE equalityExpressionAstNode = new ASTNODE();
+        equalityExpressionAstNode.setAstNodeType(ASTNODE_TYPE.EqualityExpression);
+        equalityExpressionAstNode.setValue("EqualityExpression");
+
+        //relation_expression
+        {
+            ASTNODE relationExpressionAstNode = relationExpression();
+            equalityExpressionAstNode.insertChildrenNode(relationExpressionAstNode);
+        }
+
+        if(TOKEN_TYPE.Eq == curTok.getToken_type() || TOKEN_TYPE.Ne == curTok.getToken_type()) {
+            //Eq or Ne
+            ASTNODE_TYPE operType = TOKEN_TYPE.Eq == curTok.getToken_type() ? ASTNODE_TYPE.Eq : ASTNODE_TYPE.Ne;
+            String operStr = TOKEN_TYPE.Eq == curTok.getToken_type() ? "==" : "!=";
+
+            ASTNODE eqOperAstNode = new ASTNODE();
+            eqOperAstNode.setAstNodeType(operType);
+            eqOperAstNode.setValue(operStr);
+            equalityExpressionAstNode.insertChildrenNode(eqOperAstNode);
+
+            curTok = lexer.getNextToken();// eat '==' or '!='
+
+            //equality_expression
+            ASTNODE  equalityChildrenExpressionAstNode = equalityExpression();
+            eqOperAstNode.setAstNodeType(ASTNODE_TYPE.EqualityExpression);
+            eqOperAstNode.setValue("EqualityExpression");
+            equalityExpressionAstNode.insertChildrenNode(equalityChildrenExpressionAstNode);
+        }
+        return equalityExpressionAstNode;
+    }
+
+//relational_expression
+//    : additive_expression
+//    | additive_expression GT relation_expression
+//    | additive_expression GE relation_expression
+//    | additive_expression LT relation_expression
+//    | additive_expression LE relation_expression
+//    RelationExpression,
+    private ASTNODE relationExpression() {
+        ASTNODE relationExpressionAstNode = new ASTNODE();
+        relationExpressionAstNode.setAstNodeType(ASTNODE_TYPE.RelationExpression);
+        relationExpressionAstNode.setValue("RelationExpression");
+
+        // additive_expression
+        {
+            ASTNODE addExpresisonAstNode = additiveExpression();
+            relationExpressionAstNode.insertChildrenNode(addExpresisonAstNode);
+        }
+
+        if(TOKEN_TYPE.Ge == curTok.getToken_type()
+                || TOKEN_TYPE.Gt == curTok.getToken_type()
+                || TOKEN_TYPE.Le == curTok.getToken_type()
+                || TOKEN_TYPE.Lt == curTok.getToken_type())
+        {
+            ASTNODE_TYPE operType = ASTNODE_TYPE.UnknownAstNode;
+            String operStr = "";
+
+            ASTNODE operAstNode =  new ASTNODE();
+            if(TOKEN_TYPE.Ge == curTok.getToken_type()) {
+                operType = ASTNODE_TYPE.Ge;
+                operStr = ">=";
+            }
+            if(TOKEN_TYPE.Gt == curTok.getToken_type()) {
+                operType = ASTNODE_TYPE.Gt;
+                operStr = ">";
+            }
+            if(TOKEN_TYPE.Le == curTok.getToken_type()) {
+                operType = ASTNODE_TYPE.Le;
+                operStr = "<=";
+            }
+            if(TOKEN_TYPE.Lt == curTok.getToken_type()) {
+                operType = ASTNODE_TYPE.Lt;
+                operStr = "<";
+            }
+            operAstNode.setAstNodeType(operType);
+            operAstNode.setValue(operStr);
+            relationExpressionAstNode.insertChildrenNode(operAstNode);
+
+            curTok = lexer.getNextToken();// eat '>=' , '>' , '<=' '<'
+
+            ASTNODE relationExpressionChildrenAstNode = relationExpression();
+            relationExpressionAstNode.insertChildrenNode(relationExpressionChildrenAstNode);
+        }
+
+        return relationExpressionAstNode;
     }
 
 //additive_expression

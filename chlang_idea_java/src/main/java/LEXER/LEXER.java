@@ -188,10 +188,54 @@ public class LEXER{
         }
 
         if('=' == c) {
-            token.setToken_type(TOKEN_TYPE.Assign);
-            token.setStr("=");
-            srcCurPos++;
+            char tmpChar =  srcCurPos + 1 >= srcLen ? ' ' : src.charAt(srcCurPos + 1);
+            if('=' == tmpChar) {
+                token.setToken_type(TOKEN_TYPE.Eq);
+                token.setStr("==");
+                srcCurPos += 2;
+            } else {
+                token.setToken_type(TOKEN_TYPE.Assign);
+                token.setStr("=");
+                srcCurPos++;
+            }
+            return token;
+        }
 
+        if('!' == c) {
+            char tmpChar =  srcCurPos + 1 >= srcLen ? ' ' : src.charAt(srcCurPos + 1);
+            if('=' == tmpChar) {
+                token.setToken_type(TOKEN_TYPE.Ne);
+                token.setStr("!=");
+                srcCurPos += 2;
+            }
+            return token;
+        }
+
+        if('>' == c) {
+            char tmpChar =  srcCurPos + 1 >= srcLen ? ' ' : src.charAt(srcCurPos + 1);
+            if('=' == tmpChar) {
+                token.setToken_type(TOKEN_TYPE.Ge);
+                token.setStr(">=");
+                srcCurPos += 2;
+            } else {
+                token.setToken_type(TOKEN_TYPE.Gt);
+                token.setStr(">");
+                srcCurPos++;
+            }
+            return token;
+        }
+
+        if('<' == c) {
+            char tmpChar =  srcCurPos + 1 >= srcLen ? ' ' : src.charAt(srcCurPos + 1);
+            if('=' == tmpChar) {
+                token.setToken_type(TOKEN_TYPE.Le);
+                token.setStr("<=");
+                srcCurPos += 2;
+            } else {
+                token.setToken_type(TOKEN_TYPE.Lt);
+                token.setStr(">");
+                srcCurPos++;
+            }
             return token;
         }
 

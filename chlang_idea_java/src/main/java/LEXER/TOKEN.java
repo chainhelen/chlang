@@ -87,6 +87,12 @@ public class TOKEN {
                 TOKEN_TYPE.Ent == token.token_type ||
                 TOKEN_TYPE.Sem == token.token_type ||
                 TOKEN_TYPE.Assign == token.token_type ||
+                TOKEN_TYPE.Eq == token.token_type ||
+                TOKEN_TYPE.Ne == token.token_type ||
+                TOKEN_TYPE.Gt == token.token_type ||
+                TOKEN_TYPE.Ge == token.token_type ||
+                TOKEN_TYPE.Lt == token.token_type ||
+                TOKEN_TYPE.Le == token.token_type ||
 
                 TOKEN_TYPE.LParen == token.token_type ||
                 TOKEN_TYPE.RParen == token.token_type ||

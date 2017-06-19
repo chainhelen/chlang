@@ -91,9 +91,27 @@ public class EVAL_TEST {
         String src = "";
         src +=  "int w = -51;\n";
         src +=  "int s = 100;\n";
-        src += "while(w) { w = w + 1; s = s + 1;}\n";
+        src += "while(w < 100) { w = w + 1; s = s + 1;}\n";
         src += "println(w);\n";
         src += "println(s);\n";
+
+        LEXER lexer = new LEXER(src);
+        PARSER parser = new PARSER(lexer);
+
+        List<ASTNODE> listAstNode = parser.parse();
+
+        EVAL eval = new EVAL();
+        eval.run(listAstNode);
+    }
+
+    @Test
+    public void RelationExpressionTest() {
+        String src = "";
+        src += "if(2 >= 1) {println(\"2 >= 1\");}\n";
+        src += "if(2 > 1) {println(\"2 > 1\");}\n";
+        src += "if(1 < 2) {println(\"1 < 2\");}\n";
+        src += "if(1 <= 2) {println(\"1 <= 2\");}\n";
+        src += "if(1 > 2) {println(\"No\");} else { println(\"Yes\");}\n";
 
         LEXER lexer = new LEXER(src);
         PARSER parser = new PARSER(lexer);

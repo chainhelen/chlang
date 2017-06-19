@@ -11,6 +11,12 @@ public enum ASTNODE_TYPE {
 //token_type
     Identifier,
     Assign,
+    Eq,
+    Ne,
+    Ge,
+    Gt,
+    Le,
+    Lt,
     Add,
     Sub,
     Mul,
@@ -52,7 +58,7 @@ public enum ASTNODE_TYPE {
 //    | TYPE(int | string) IDENTIFIER ASSIGN expression
 //    | IDENTIFIER ASSIGN expression
 //    | additive_expression --  //为了添加关系运算符, relation 比 additive more primitive
-//    | relation_expression ++
+//    | equality_expression ++
     Expression,
 
 //logical_or_expression
@@ -69,9 +75,8 @@ public enum ASTNODE_TYPE {
 
 //equality_expression
 //    : relational_expression
-//    | equality_expression EQ relation_expression
-//    | equality_expression NE relation_expression
-// need to write
+//    | relation_expression EQ equality_expression
+//    | relation_expression NE equality_expression
     EqualityExpression,
 
 //relational_expression

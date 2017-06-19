@@ -25,6 +25,12 @@ public enum TOKEN_TYPE {
     Sem, // ';'
     COMMA, // ','
     Assign, // '='
+    Eq, // '=='
+    Ne, // '!='
+    Gt, // '>'
+    Ge, //  '>='
+    Lt, // '<'
+    Le, // '<='
 
     LParen, // "('
     RParen, // ')'
