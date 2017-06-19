@@ -610,6 +610,74 @@ public class PARSER {
         return ifStatementAstNode;
     }
 
+    private ASTNODE whileStatement() {
+        ASTNODE whileStatementAstNode = new ASTNODE();
+        whileStatementAstNode.setAstNodeType(ASTNODE_TYPE.WhileStatement);
+        whileStatementAstNode.setValue("WhileStatement");
+
+        curTok = lexer.getNextToken(); //eat "while"
+
+        //check LP
+        if(TOKEN_TYPE.LParen != curTok.getToken_type()) {
+            logger.error(" WhileStatement Expect token type = " + TOKEN_TYPE.LParen);
+            logger.error("\tbut get the type = " + curTok.getToken_type());
+            System.exit(0);
+        }
+        curTok = lexer.getNextToken(); //eat LP
+
+        //expression
+        ASTNODE expressionAstNode = expression();
+        whileStatementAstNode.insertChildrenNode(expressionAstNode);
+
+        //check RP
+        if(TOKEN_TYPE.RParen != curTok.getToken_type()) {
+            logger.error(" WhileStatement Expect token type = " + TOKEN_TYPE.RParen);
+            logger.error("\tbut get the type = " + curTok.getToken_type());
+            System.exit(0);
+        }
+        curTok = lexer.getNextToken(); //eat RP
+
+        //block
+        ASTNODE blockAstNode = block();
+        whileStatementAstNode.insertChildrenNode(blockAstNode);
+
+        return whileStatementAstNode;
+    }
+
+    private ASTNODE breakStatement() {
+        ASTNODE breakStatementAstNode = new ASTNODE();
+        breakStatementAstNode.setAstNodeType(ASTNODE_TYPE.BreakStatement);
+        breakStatementAstNode.setValue("BreakStatement");
+
+        curTok = lexer.getNextToken(); //eat "break"
+        //check Sem
+        if(TOKEN_TYPE.Sem != curTok.getToken_type()) {
+            logger.error("BreakStatement Expect token type = " + TOKEN_TYPE.Sem);
+            logger.error("\tbut get the type = " + curTok.getToken_type());
+            System.exit(0);
+        }
+        curTok = lexer.getNextToken(); // eat ";"
+
+        return breakStatementAstNode;
+    }
+
+    private ASTNODE continueStatement() {
+        ASTNODE continueStatementAstNode = new ASTNODE();
+        continueStatementAstNode.setAstNodeType(ASTNODE_TYPE.ContinueStatement);
+        continueStatementAstNode.setValue("ContinueStatement");
+
+        curTok = lexer.getNextToken(); //eat "continue"
+        //check Sem
+        if(TOKEN_TYPE.Sem != curTok.getToken_type()) {
+            logger.error("ContinueStatement Expect token type = " + TOKEN_TYPE.Sem);
+            logger.error("\tbut get the type = " + curTok.getToken_type());
+            System.exit(0);
+        }
+        curTok = lexer.getNextToken(); // eat ";"
+
+        return continueStatementAstNode;
+    }
+
     private ASTNODE returnStatement() {
         ASTNODE returnStatementAstNode = new ASTNODE();
         returnStatementAstNode.setAstNodeType(ASTNODE_TYPE.ReturnStatement);
@@ -619,15 +687,15 @@ public class PARSER {
 
         ASTNODE expressionAstNode = expression();
 
+        //check Sem
         if(TOKEN_TYPE.Sem != curTok.getToken_type()) {
-            logger.error(" ReturnStatement Expect token type = " + TOKEN_TYPE.Sem);
+            logger.error("ReturnStatement Expect token type = " + TOKEN_TYPE.Sem);
             logger.error("\tbut get the type = " + curTok.getToken_type());
             System.exit(0);
         }
-        returnStatementAstNode.insertChildrenNode(expressionAstNode);
-
         curTok = lexer.getNextToken(); // eat ";"
 
+        returnStatementAstNode.insertChildrenNode(expressionAstNode);
         return returnStatementAstNode;
     }
 
@@ -635,11 +703,12 @@ public class PARSER {
 //    : expression SEM
 //    | global_statement --
 //    | if_statiement ++
-//    | while_statement --
 //    | for_statement --
+//    | while_statement ++
+//    | break_statement ++
+//    | continue_statement ++
 //    | return_statement ++
-//    | break_statement --
-//    | continue_statement --
+
     private ASTNODE statement() {
         ASTNODE statementAstNode = new ASTNODE();
         statementAstNode.setAstNodeType(ASTNODE_TYPE.Statement);
@@ -650,6 +719,27 @@ public class PARSER {
         {
             ASTNODE ifStatementAstNode = ifStatement();
             statementAstNode.insertChildrenNode(ifStatementAstNode);
+            return statementAstNode;
+        }
+
+        //while_statement
+        if(TOKEN_TYPE.RW_While == curTok.getToken_type()) {
+            ASTNODE whileStatementAstNode = whileStatement();
+            statementAstNode.insertChildrenNode(whileStatementAstNode);
+            return statementAstNode;
+        }
+
+        //break_statment
+        if(TOKEN_TYPE.RW_Break == curTok.getToken_type()) {
+            ASTNODE breakStatementAstNode = breakStatement();
+            statementAstNode.insertChildrenNode(breakStatementAstNode);
+            return statementAstNode;
+        }
+
+        //continue_statement
+        if(TOKEN_TYPE.RW_Continue == curTok.getToken_type()) {
+            ASTNODE continueStatementAstNode = continueStatement();
+            statementAstNode.insertChildrenNode(continueStatementAstNode);
             return statementAstNode;
         }
 

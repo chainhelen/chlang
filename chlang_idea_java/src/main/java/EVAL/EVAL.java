@@ -143,7 +143,6 @@ public class EVAL {
             System.exit(0);
         }
 
-
         //control flow
         //return
         if(CtrFlowFlag.RETURN == ctrFlowFlag) {
@@ -153,13 +152,14 @@ public class EVAL {
         //control flow
         //break
         if(CtrFlowFlag.BREAK == ctrFlowFlag) {
+            return;
         }
 
         //control flow
         //continue
         if(CtrFlowFlag.CONTINUE == ctrFlowFlag) {
+            return;
         }
-
 
         ASTNODE_TYPE nodeType = parentNode.getAstNodeType();
 
@@ -431,6 +431,30 @@ public class EVAL {
                     recursionEvalAstNode(blockAstNode);
                 }
             }
+        } else if(ASTNODE_TYPE.WhileStatement == nodeType) {
+            List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
+            while(true) {
+                ASTNODE expressionAstNode = astNodeList.get(0);
+                ASTNODE blockAstNode = astNodeList.get(1);
+                if(CtrFlowFlag.BREAK == ctrFlowFlag) {
+                    ctrFlowFlag = CtrFlowFlag.NEXT;
+                    break;
+                }
+                if(CtrFlowFlag.CONTINUE == ctrFlowFlag) {
+                    ctrFlowFlag = CtrFlowFlag.NEXT;
+                }
+                recursionEvalAstNode(expressionAstNode);
+                Object res = this.expResStack.pop();
+                if (!(res.getClass() == java.lang.Integer.class && 0 == (int) res)) {
+                    recursionEvalAstNode(blockAstNode);
+                } else {
+                    break;
+                }
+            }
+        } else if(ASTNODE_TYPE.BreakStatement == nodeType) {
+            ctrFlowFlag = CtrFlowFlag.BREAK;
+        } else if(ASTNODE_TYPE.ContinueStatement == nodeType) {
+            ctrFlowFlag = CtrFlowFlag.CONTINUE;
         } else if(ASTNODE_TYPE.ReturnStatement == nodeType) {
             ASTNODE expressionAstNode  = parentNode.getFirstChildrenNode();
             recursionEvalAstNode(expressionAstNode);
@@ -444,7 +468,11 @@ public class EVAL {
                 recursionEvalAstNode(astNodeList.get(0));
             } else if(ASTNODE_TYPE.IfStatement == theFirstAstNode.getAstNodeType()) {
                 recursionEvalAstNode(astNodeList.get(0));
-            } else if(ASTNODE_TYPE.ReturnStatement == theFirstAstNode.getAstNodeType()) {
+            } else if(ASTNODE_TYPE.WhileStatement == theFirstAstNode.getAstNodeType()) {
+                recursionEvalAstNode(astNodeList.get(0));
+            } else if(ASTNODE_TYPE.BreakStatement == theFirstAstNode.getAstNodeType()) {
+                recursionEvalAstNode(astNodeList.get(0));
+            } else if(ASTNODE_TYPE.ContinueStatement == theFirstAstNode.getAstNodeType()) {
                 recursionEvalAstNode(astNodeList.get(0));
             }
 

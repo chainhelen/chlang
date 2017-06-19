@@ -72,6 +72,8 @@ public class TOKEN {
                 TOKEN_TYPE.RW_Int == token.token_type ||
                 TOKEN_TYPE.RW_String == token.token_type ||
                 TOKEN_TYPE.RW_While == token.token_type ||
+                TOKEN_TYPE.RW_Break == token.token_type ||
+                TOKEN_TYPE.RW_Continue == token.token_type ||
                 TOKEN_TYPE.RW_If == token.token_type ||
                 TOKEN_TYPE.RW_Elif == token.token_type ||
                 TOKEN_TYPE.RW_Else == token.token_type ||

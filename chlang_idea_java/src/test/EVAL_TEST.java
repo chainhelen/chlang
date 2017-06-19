@@ -85,4 +85,22 @@ public class EVAL_TEST {
         EVAL eval = new EVAL();
         eval.run(listAstNode);
     }
+
+    @Test
+    public void WhileTest() {
+        String src = "";
+        src +=  "int w = -51;\n";
+        src +=  "int s = 100;\n";
+        src += "while(w) { w = w + 1; s = s + 1;}\n";
+        src += "println(w);\n";
+        src += "println(s);\n";
+
+        LEXER lexer = new LEXER(src);
+        PARSER parser = new PARSER(lexer);
+
+        List<ASTNODE> listAstNode = parser.parse();
+
+        EVAL eval = new EVAL();
+        eval.run(listAstNode);
+    }
 }

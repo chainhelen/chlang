@@ -9,6 +9,8 @@ public enum TOKEN_TYPE {
     RW_Int,
     RW_String,
     RW_While,
+    RW_Break,
+    RW_Continue,
     RW_If,
     RW_Elif,
     RW_Else,

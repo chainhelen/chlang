@@ -125,6 +125,18 @@ public enum ASTNODE_TYPE {
 //  |  IfExpressionBlock (ElifExpressionBlock)* ElseExpressionBlock
     IfStatement,
 
+//while_statement
+//  |  RW_While LP expression RP Block
+    WhileStatement,
+
+//break_statement ++
+// | RW_Break Sem
+    BreakStatement,
+
+//    | continue_statement ++
+// | RW_Continue Sem
+    ContinueStatement,
+
 //Return_statement
 // | RW_Return expression SEM
 // don't support lambd, but can return function and finish closure
@@ -134,11 +146,11 @@ public enum ASTNODE_TYPE {
 //    : expression SEM
 //    | global_statement --
 //    | if_statiement ++
-//    | while_statement --
+//    | while_statement ++
 //    | for_statement --
 //    | return_statement ++
-//    | break_statement --
-//    | continue_statement --
+//    | break_statement ++
+//    | continue_statement ++
     Statement,
 
 //block
