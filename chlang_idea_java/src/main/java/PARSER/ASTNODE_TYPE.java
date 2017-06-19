@@ -51,7 +51,8 @@ public enum ASTNODE_TYPE {
 //    : logical_or_expression   --  //考虑到程序简单性，先直接跳过or等等逻辑运算符
 //    | TYPE(int | string) IDENTIFIER ASSIGN expression
 //    | IDENTIFIER ASSIGN expression
-//    | additive_expression ++  //直接使用add表达子式
+//    | additive_expression --  //为了添加关系运算符, relation 比 additive more primitive
+//    | relation_expression ++
     Expression,
 
 //logical_or_expression
@@ -75,10 +76,10 @@ public enum ASTNODE_TYPE {
 
 //relational_expression
 //    : additive_expression
-//    | relation_expression GT additive_expression
-//    | relation_expression GE additive_expression
-//    | relation_expression LT additive_expression
-//    | relation_expression LE additive_expression
+//    | additive_expression GT relation_expression
+//    | additive_expression GE relation_expression
+//    | additive_expression LT relation_expression
+//    | additive_expression LE relation_expression
     RelationExpression,
 
 //additive_expression
