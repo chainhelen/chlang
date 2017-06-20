@@ -107,6 +107,7 @@ public class PARSER {
 
 //function_definition
 //    : FUNCTION IDENTIFIER LP parameter_list RP block
+//    | Rw_Function IDENTIFIER ASSIGN expression SEM
     private ASTNODE functionDefinition() {
         // rootAST
         ASTNODE astRootNode = new ASTNODE();
@@ -124,35 +125,49 @@ public class PARSER {
         }
 
         // LP
-        {
-            if (TOKEN_TYPE.LParen != curTok.getToken_type()) {
-                logger.error("functionDefinition expect the LP");
+        if(TOKEN_TYPE.LParen == curTok.getToken_type()) {
+            curTok = lexer.getNextToken(); // eat '('
+            // parameter_list
+            {
+                ASTNODE parameterList = parameterList();
+                astRootNode.insertChildrenNode(parameterList);
+            }
+
+            //RP
+            {
+                if (TOKEN_TYPE.RParen != curTok.getToken_type()) {
+                    logger.error("functionDefinition expect the LP");
+                    logger.error("but get the token_type " + curTok.getToken_type().toString() + " line " + lexer.getLine());
+                    System.exit(0);
+                }
+                curTok = lexer.getNextToken(); // eat ')'
+            }
+
+            //block
+            {
+                ASTNODE blockAstNode = block();
+                astRootNode.insertChildrenNode(blockAstNode);
+            }
+        } else if(TOKEN_TYPE.Assign == curTok.getToken_type())  {
+            curTok = lexer.getNextToken(); // eat '='
+            ASTNODE assginAstNode = new ASTNODE();
+            assginAstNode.setAstNodeType(ASTNODE_TYPE.Assign);
+            assginAstNode.setValue("=");
+            astRootNode.insertChildrenNode(assginAstNode);
+
+            ASTNODE expressionAstNode = expression(); // eat expression
+            astRootNode.insertChildrenNode(expressionAstNode);
+
+            if(TOKEN_TYPE.Sem != curTok.getToken_type()) {
+                logger.error("functionDefinition expect the Sem");
                 logger.error("\tbut get the token_type " + curTok.getToken_type());
                 System.exit(0);
             }
-            curTok = lexer.getNextToken();
-        }
-
-        // parameter_list
-        {
-            ASTNODE parameterList = parameterList();
-            astRootNode.insertChildrenNode(parameterList);
-        }
-
-        //RP
-        {
-            if (TOKEN_TYPE.RParen != curTok.getToken_type()) {
-                logger.error("functionDefinition expect the LP");
-                logger.error("but get the token_type " + curTok.getToken_type().toString() + " line " + lexer.getLine());
-                System.exit(0);
-            }
-            curTok = lexer.getNextToken();
-        }
-
-        //block
-        {
-            ASTNODE blockAstNode = block();
-            astRootNode.insertChildrenNode(blockAstNode);
+            curTok = lexer.getNextToken(); // eat ';'
+        } else {
+            logger.error("functionDefinition expect the LP || Assign");
+            logger.error("\tbut get the token_type " + curTok.getToken_type());
+            System.exit(0);
         }
 
         return astRootNode;
@@ -237,16 +252,18 @@ public class PARSER {
     }
 //statement_list
 //    : NULL
-//    | statement
-//    | statement statemen_list
+//    | statement --
+//    | statement statemen_list --
+//    | definition_or_statment ++
+//    | definition_or_statment statemen_list ++
     private ASTNODE statementList() {
         ASTNODE statementListAstRootNode = new ASTNODE();
         statementListAstRootNode.setAstNodeType(ASTNODE_TYPE.StatementList);
         statementListAstRootNode.setValue("StatementList");
 
         while(TOKEN_TYPE.RBrace != curTok.getToken_type()) {
-            ASTNODE statementAstNode = statement();
-            statementListAstRootNode.insertChildrenNode(statementAstNode);
+            ASTNODE definitionOrStatementAstNode = definitionOrStatement();
+            statementListAstRootNode.insertChildrenNode(definitionOrStatementAstNode);
         }
         return statementListAstRootNode;
     }

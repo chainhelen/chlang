@@ -33,6 +33,7 @@ public enum ASTNODE_TYPE {
 
 //function_definition
 //    : Rw_Function IDENTIFIER LP parameter_`list RP block
+//    | Rw_Function IDENTIFIER ASSIGN expression
     FunctionDefinition,
 
 //parameter_list
@@ -49,8 +50,10 @@ public enum ASTNODE_TYPE {
 
 //statement_list
 //    : NULL
-//    | statement
-//    | statement statemen_list
+//    | statement --
+//    | statement statemen_list --
+//    | definition_or_statment ++
+//    | definition_or_statment statemen_list ++
     StatementList,
 
 //expression
@@ -107,7 +110,6 @@ public enum ASTNODE_TYPE {
 
 //primary_expression
 //    : IDENTIFIER LP argument_list RP
-//    | IDENTIFIER LP RP
 //    | LP expression RP
 //    | IDENTIFIER
 //    | INT_LITERAL

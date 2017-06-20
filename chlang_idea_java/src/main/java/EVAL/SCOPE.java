@@ -20,19 +20,15 @@ class SYMBOL {
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
     public SYMBOL_TYPE getType() {
         return type;
     }
-
     public void setType(SYMBOL_TYPE type) {
         this.type = type;
     }
-
     public void setType(Object o) {
         if(o.getClass().getName().equals("Integer"))  {
             this.type = SYMBOL_TYPE.VariableInt;
@@ -40,14 +36,19 @@ class SYMBOL {
             this.type = SYMBOL_TYPE.VariableStr;
         }
     }
-
     public Object getValue() {
         return value;
     }
-
     public void setValue(Object value) {
         this.value = value;
     }
+    public Object getScope() {
+        return scope;
+    }
+    public void setScope(Object scope) {
+        this.scope = scope;
+    }
+
 
     public boolean checkType(Object o) {
         if(o.getClass() == java.lang.Integer.class && SYMBOL_TYPE.VariableInt == this.type) {
@@ -65,6 +66,7 @@ class SYMBOL {
         newSymbol.name = this.name;
         newSymbol.type = this.type;
         newSymbol.value = this.value;
+        newSymbol.scope = this.scope;
 
         return newSymbol;
     }
@@ -73,13 +75,23 @@ class SYMBOL {
         this.name = name;
         this.type = type;
         this.value = value;
+        this.scope = null;
     }
+
+    public SYMBOL(String name, SYMBOL_TYPE type, Object value, Object scope) {
+        this.name = name;
+        this.type = type;
+        this.value = value;
+        this.scope = scope;
+    }
+
     public SYMBOL() {
     }
 
     private String name;
     private SYMBOL_TYPE type;
     private Object value;
+    private Object scope;
 }
 
 public class SCOPE {
@@ -105,4 +117,3 @@ public class SCOPE {
         this.symbols.add(newSymbol);
     }
 }
-

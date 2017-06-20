@@ -121,4 +121,31 @@ public class EVAL_TEST {
         EVAL eval = new EVAL();
         eval.run(listAstNode);
     }
+
+    @Test
+    public void ClosureTest() {
+        String src = "";
+        src += "function add(a) {\n" +
+                    "int b = a + 1;\n" +
+                    "function mul() {\n" +
+                        "b = b + 1;\n" +
+                        "println(b);\n" +
+                    "}\n" +
+                    "return mul;\n" +
+                "}\n";
+        src += "function w = add(100);\n";
+        src += "w();\n";
+        src += "w();\n";
+        src += "function s = add(200);\n";
+        src += "s();\n";
+        src += "s();\n";
+
+        LEXER lexer = new LEXER(src);
+        PARSER parser = new PARSER(lexer);
+
+        List<ASTNODE> listAstNode = parser.parse();
+
+        EVAL eval = new EVAL();
+        eval.run(listAstNode);
+    }
 }

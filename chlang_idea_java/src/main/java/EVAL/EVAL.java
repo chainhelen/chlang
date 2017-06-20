@@ -71,6 +71,11 @@ class ScopeNode {
 class ScopeCtr {
     private ScopeNode scopeRootNode;
     private ScopeNode curScopeNode;
+    private Stack<Object> scopeNodeStack = new Stack<Object>();
+
+    public ScopeNode getCurScopeNode() {
+        return curScopeNode;
+    }
 
     protected void initScopeList() {
         scopeRootNode = new ScopeNode();
@@ -130,6 +135,17 @@ class ScopeCtr {
 //            scopeList.remove(0);
 //        }
 //    }
+
+    public void storeCurScopeNode(Object newScope) {
+        if(null != newScope) {
+            scopeNodeStack.push(curScopeNode);
+            curScopeNode = (ScopeNode)newScope;
+        }
+    }
+
+    public void restoreCurScopeNode() {
+        curScopeNode = (ScopeNode)scopeNodeStack.pop();
+    }
 }
 
 public class EVAL {
@@ -164,26 +180,67 @@ public class EVAL {
         ASTNODE_TYPE nodeType = parentNode.getAstNodeType();
 
         if(ASTNODE_TYPE.DefinitionOrStatement == nodeType) {
+
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             for(Iterator it = astNodeList.iterator();it.hasNext();) {
                 recursionEvalAstNode((ASTNODE)it.next());
             }
+
         } else if(ASTNODE_TYPE.FunctionDefinition == nodeType) {
 
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             ASTNODE identifier = astNodeList.get(0);
-            scopeCtr.addSymbolInCurScope(new SYMBOL(identifier.getValue().toString(),
-                    SYMBOL_TYPE.Function,
-                    parentNode));
+
+            if(ASTNODE_TYPE.ParameterList == astNodeList.get(1).getAstNodeType()) {
+                SYMBOL symbol = new SYMBOL(identifier.getValue().toString(),
+                        SYMBOL_TYPE.Function,
+                        parentNode, scopeCtr.getCurScopeNode());
+                scopeCtr.addSymbolInCurScope(symbol);
+            } else if(ASTNODE_TYPE.Assign == astNodeList.get(1).getAstNodeType()) {
+                ASTNODE expressionAstNode = astNodeList.get(2);
+                recursionEvalAstNode(expressionAstNode);
+                Object resObj = this.expResStack.pop();
+                if(resObj.getClass() == SYMBOL.class){
+                    SYMBOL expressionSymbol = (SYMBOL)resObj;
+                    SYMBOL symbol = new SYMBOL(identifier.getValue().toString(),
+                            SYMBOL_TYPE.Function,
+                            expressionSymbol.getValue(), expressionSymbol.getScope());
+                    scopeCtr.addSymbolInCurScope(symbol);
+                } else {
+                    System.out.printf("ASTNODE_TYPE FunctionDefinition Expect the type of result from stack is SYMBOL");
+                    System.out.printf("\t but get the type = " + resObj.getClass());
+                    System.exit(0);
+                }
+            } else {
+                System.out.printf("ASTNODE_TYPE FunctionDefinition Expect Parameter || Assign");
+                System.out.printf("\t but get the ASTNODE_TYPE = " + astNodeList.get(1).getAstNodeType());
+                System.exit(0);
+            }
 
         } else if(ASTNODE_TYPE.ParameterList == nodeType) {
 
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             for(int i = 0;i < astNodeList.size();i++) {
                 ASTNODE parameter = astNodeList.get(i);
-                scopeCtr.addSymbolInCurScope(new SYMBOL(parameter.getValue().toString(),
-                        SYMBOL_TYPE.VariableStr,
-                        this.expResStack.pop()));
+                Object resObj = this.expResStack.pop();
+                if(java.lang.Integer.class == resObj.getClass()) {
+                    SYMBOL symbol = new SYMBOL(parameter.getValue().toString(),
+                            SYMBOL_TYPE.VariableInt,
+                            (int)resObj);
+                    scopeCtr.addSymbolInCurScope(symbol);
+                }
+                if(java.lang.String.class == resObj.getClass()) {
+                    SYMBOL symbol = new SYMBOL(parameter.getValue().toString(),
+                            SYMBOL_TYPE.VariableStr,
+                            (String)resObj);
+                    scopeCtr.addSymbolInCurScope(symbol);
+                }
+                if(SYMBOL.class == resObj.getClass()) {
+                    SYMBOL symbol = new SYMBOL(parameter.getValue().toString(),
+                            SYMBOL_TYPE.Function,
+                            resObj);
+                    scopeCtr.addSymbolInCurScope(symbol);
+                }
             }
 
         } else if(ASTNODE_TYPE.ArgumentList == nodeType) {
@@ -197,6 +254,7 @@ public class EVAL {
             for(int i = 0;i < res.size();i++) {
                 this.expResStack.push(res.get(i));
             }
+
         } else if(ASTNODE_TYPE.StatementList == nodeType) {
 
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
@@ -438,7 +496,7 @@ public class EVAL {
                 Object res = unaryExpRes;
                 if(java.lang.Integer.class == unaryExpRes.getClass()) {
                     res = 0 - (int)unaryExpRes;
-                }else if(java.lang.Integer.class == unaryExpRes.getClass()) {
+                }else if(java.lang.String.class == unaryExpRes.getClass()) {
                     res = "0" + (String)unaryExpRes;
                 } else {
                 }
@@ -449,7 +507,6 @@ public class EVAL {
 
             //IDENTIFIER
             //IDENTIFIER LP argument_list RP
-            //IDENTIFIER LP RP
             if(ASTNODE_TYPE.Identifier == astNodeList.get(0).getAstNodeType()) {
                 ASTNODE identifierNode = astNodeList.get(0);
                 SYMBOL symbol = scopeCtr.getSymbolByName(identifierNode.getValue().toString());
@@ -469,22 +526,26 @@ public class EVAL {
                     if (astNodeList.size() >= 2) {
                         ASTNODE argumentNodeList = astNodeList.get(1);
                         recursionEvalAstNode(argumentNodeList);
-                    }
 
-                    //Function
-                    if (SYMBOL_TYPE.Function == symbol.getType()) {
-                        List<ASTNODE> funcNodeList = ((ASTNODE) symbol.getValue()).getAllChildreNodeList();
-                        ASTNODE parameterList = funcNodeList.get(1);
-                        ASTNODE funcBody = funcNodeList.get(2);
+                        //Function call
+                        if (SYMBOL_TYPE.Function == symbol.getType()) {
+                            List<ASTNODE> funcNodeList = ((ASTNODE) symbol.getValue()).getAllChildreNodeList();
+                            ASTNODE parameterList = funcNodeList.get(1);
+                            ASTNODE funcBody = funcNodeList.get(2);
 
-                        scopeCtr.enterNewScope();
-                        recursionEvalAstNode(parameterList);
-                        recursionEvalAstNode(funcBody);
-                        ctrFlowFlag = CtrFlowFlag.NEXT;
-                        scopeCtr.backTraceCurScope();
-                    }
-                    if (SYMBOL_TYPE.INT == symbol.getType()) {
-                        execIntFunction((int)symbol.getValue(), astNodeList.get(1).getAllChildreNodeList().size());
+                            scopeCtr.storeCurScopeNode(symbol.getScope());
+                            scopeCtr.enterNewScope();
+                            recursionEvalAstNode(parameterList);
+                            recursionEvalAstNode(funcBody);
+                            ctrFlowFlag = CtrFlowFlag.NEXT;
+                            scopeCtr.backTraceCurScope();
+                            scopeCtr.restoreCurScopeNode();
+                        }
+                        if (SYMBOL_TYPE.INT == symbol.getType()) {
+                            execIntFunction((int)symbol.getValue(), astNodeList.get(1).getAllChildreNodeList().size());
+                        }
+                    } else {
+                        this.expResStack.push(symbol);
                     }
                 }
             } else if(ASTNODE_TYPE.Expression == astNodeList.get(0).getAstNodeType()) { // LP expression RP
@@ -562,8 +623,9 @@ public class EVAL {
                 recursionEvalAstNode(astNodeList.get(0));
             } else if(ASTNODE_TYPE.ContinueStatement == theFirstAstNode.getAstNodeType()) {
                 recursionEvalAstNode(astNodeList.get(0));
+            } else if(ASTNODE_TYPE.ReturnStatement == theFirstAstNode.getAstNodeType()) {
+                recursionEvalAstNode(astNodeList.get(0));
             }
-
         } else if(ASTNODE_TYPE.Block == nodeType) {
             List<ASTNODE> astNodeList = parentNode.getAllChildreNodeList();
             scopeCtr.enterNewScope();
