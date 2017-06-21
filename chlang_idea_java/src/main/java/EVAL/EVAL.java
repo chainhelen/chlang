@@ -152,6 +152,7 @@ public class EVAL {
     private ScopeCtr scopeCtr = new ScopeCtr();
     private Stack expResStack = new Stack();
     private CtrFlowFlag ctrFlowFlag = CtrFlowFlag.NEXT;
+    private String outPutString = null;
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private void recursionEvalAstNode(ASTNODE parentNode) {
@@ -648,6 +649,7 @@ public class EVAL {
                 s += this.expResStack.pop();
             }
             System.out.print(s);
+            outPutString = null == outPutString ? s : outPutString + s;
             this.expResStack.push(count);
         }
         if(1 == index) {
@@ -656,6 +658,7 @@ public class EVAL {
                 s += this.expResStack.pop();
             }
             System.out.println(s);
+            outPutString = null == outPutString ? (s + "\n") : outPutString + (s + "\n");
             this.expResStack.push(count);
         }
     }
@@ -681,5 +684,9 @@ public class EVAL {
         init();
         for(int i = 0;i < rootNodeList.size();i++)
             run(rootNodeList.get(i));
+    }
+
+    public String getProgramExeEndOutput(){
+        return this.outPutString;
     }
 }

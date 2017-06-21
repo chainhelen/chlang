@@ -16,6 +16,9 @@ public class EVAL_TEST {
         src += "1 + 2;\n";
         src += "string s1 = s + 1;\n";
         src += "int n = 0;\n";
+        src += "println(s);\n";
+        src += "println(s1);\n";
+        src += "println(n);\n";
 
         LEXER lexer = new LEXER(src);
         PARSER parser = new PARSER(lexer);
@@ -24,6 +27,9 @@ public class EVAL_TEST {
 
         EVAL eval = new EVAL();
         eval.run(listAstNode);
+
+        String s = eval.getProgramExeEndOutput();
+        assert(s.equals("sss\n" + "sss1\n" + "0\n"));
     }
 
     @Test
@@ -45,6 +51,9 @@ public class EVAL_TEST {
 
         EVAL eval = new EVAL();
         eval.run(listAstNode);
+
+        String s = eval.getProgramExeEndOutput();
+        assert(s.equals("sss1\n" + "hello world\n" + "3\n"));
     }
 
     @Test
@@ -64,6 +73,9 @@ public class EVAL_TEST {
 
         EVAL eval = new EVAL();
         eval.run(listAstNode);
+
+        String s = eval.getProgramExeEndOutput();
+        assert(s.equals("-1\n" + "1\n" + "1\n" + "0\n"));
     }
 
     @Test
@@ -84,6 +96,9 @@ public class EVAL_TEST {
 
         EVAL eval = new EVAL();
         eval.run(listAstNode);
+
+        String s = eval.getProgramExeEndOutput();
+        assert(s.equals("101\n" + "11\n"));
     }
 
     @Test
@@ -102,6 +117,9 @@ public class EVAL_TEST {
 
         EVAL eval = new EVAL();
         eval.run(listAstNode);
+
+        String s = eval.getProgramExeEndOutput();
+        assert(s.equals("100\n" + "251\n"));
     }
 
     @Test
@@ -120,6 +138,9 @@ public class EVAL_TEST {
 
         EVAL eval = new EVAL();
         eval.run(listAstNode);
+
+        String s = eval.getProgramExeEndOutput();
+        assert(s.equals("2 >= 1\n" + "2 > 1\n" + "1 < 2\n" + "1 <= 2\n" + "Yes\n"));
     }
 
     @Test
@@ -147,5 +168,8 @@ public class EVAL_TEST {
 
         EVAL eval = new EVAL();
         eval.run(listAstNode);
+
+        String s = eval.getProgramExeEndOutput();
+        assert(s.equals("102\n" + "103\n" + "202\n" + "203\n"));
     }
 }
